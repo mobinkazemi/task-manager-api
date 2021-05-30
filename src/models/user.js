@@ -32,7 +32,6 @@ const userSchema = new Schema({
         minlength: 2,
         maxlength: 16,
         unique: true,
-        index: "text",
         validate(n){
             if(!validator.isAlpha(n, 'en-US', {ignore: ' '})){
                 throw new Error('name contains only letters');
@@ -61,10 +60,25 @@ const userSchema = new Schema({
     confirmPassword: {
         type: String,
         required: true
+    },
+    accessToken: {
+        type: String,
+        required: true,
+        
+    },
+    refreshToken: {
+        type: String,
+        required: true
     }
 });
 
-userSchema.pre('save', hashPassword)
+
+userSchema.pre('save', function (next){
+    const user = this 
+    if(!user.isModified('password')) return next();
+    else hashPassword
+    next();
+})
 
 const User = mongoose.model('User', userSchema);
 

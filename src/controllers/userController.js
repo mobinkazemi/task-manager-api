@@ -1,5 +1,28 @@
+const jwt = require('jsonwebtoken')
 const User = require('../models/user')
+const path = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, '../../src/.env') })
 const catchAsyncError = require('../middlewares/catchAsyncError')
+
+
+const createAccessToken = (user, expireTime = "1h") => {
+    const accessToken = jwt.sign({username: user.username, password: user.password}, process.env.ACCESS_TOKEN_SECRET,{
+        issuer: 'access',
+        expiresIn: expireTime
+    })
+
+    return accessToken;
+}
+
+const createRefreshToken = (user, expireTime = "7d") => {
+    const refreshToken = jwt.sign({username: user.username, password: user.password}, process.env.REFRESH_TOKEN_SECRET, {
+        issuer: "refresh",
+        expiresIn: expireTime
+    })
+
+    return refreshToken;
+}
+
 
 module.exports.signup = catchAsyncError(async (req, res) => {
     // const newUser = await User.create(req.body)
@@ -10,6 +33,9 @@ module.exports.signup = catchAsyncError(async (req, res) => {
         return res.status(204).send();
     }
     
+    newUser.accessToken = createAccessToken(newUser);
+    newUser.refreshToken = createRefreshToken(newUser);
+
     await newUser.save()
     res.status(201).send(newUser);
     
