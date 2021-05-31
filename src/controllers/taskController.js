@@ -1,9 +1,16 @@
 const Task = require('../models/tasks')
+const jwt = require('jsonwebtoken');
 const catchAsyncError = require('../middlewares/catchAsyncError')
 
 module.exports.create = catchAsyncError(async(req, res) => {
+    const tokenInHeader = req.headers['authorization']
+    const token = tokenInHeader && tokenInHeader.split(' ')[1]
+    const payload = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+
     const newTask = new Task(req.body);
+    newTask.owner = payload.username
     await newTask.save();
+    
     res.status(201).send(newTask);
 })
 

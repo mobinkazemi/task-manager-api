@@ -1,13 +1,14 @@
 const express = require('express')
-const taskController = require('../controllers/taskController')
+const taskController = require('../controllers/taskController');
+const { tokenValidation } = require('../middlewares/tokenValidation');
 
 const router = express.Router();
 
-router.post('/create', taskController.create);
+router.post('/create', tokenValidation, taskController.create);
 
-router.get('/find', taskController.find);
+router.get('/find', tokenValidation, taskController.find);
 
-router.get('/findById:id', taskController.findById);
+router.get('/findById:id', tokenValidation, taskController.findById);
 
 // router.get ('/findByTitle:title', taskController.findByTitle);
 

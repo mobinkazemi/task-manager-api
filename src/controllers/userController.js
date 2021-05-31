@@ -6,7 +6,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../src/.env') })
 const catchAsyncError = require('../middlewares/catchAsyncError')
 
 const createAccessToken = (user, expireTime = "1h") => {
-    const accessToken = jwt.sign({username: user.username, password: user.password}, process.env.ACCESS_TOKEN_SECRET,{
+    const accessToken = jwt.sign({id: user._id, username: user.username}, process.env.ACCESS_TOKEN_SECRET,{
         issuer: 'access',
         expiresIn: expireTime
     })
@@ -15,7 +15,7 @@ const createAccessToken = (user, expireTime = "1h") => {
 }
 
 const createRefreshToken = (user, expireTime = "7d") => {
-    const refreshToken = jwt.sign({username: user.username, password: user.password}, process.env.REFRESH_TOKEN_SECRET, {
+    const refreshToken = jwt.sign({id: user._id, username: user.username}, process.env.REFRESH_TOKEN_SECRET, {
         issuer: "refresh",
         expiresIn: expireTime
     })
@@ -46,16 +46,14 @@ const compareHashedPassword = async(user, enteryPassword) => {
 
 
 module.exports.signup = catchAsyncError(async (req, res) => {
-    // const newUser = await User.create(req.body)
-    // res.status(201).send(newUser);
     const user_toSignUp = await new User(req.body);
     
     if(!user_toSignUp){
         return res.status(204).send();
     }
     
-    user_toSignUp.accessToken = createAccessToken(user_toSignUp);
-    user_toSignUp.refreshToken = createRefreshToken(user_toSignUp);
+    user_toSignUp.accessToken = "Bearer " + createAccessToken(user_toSignUp);
+    user_toSignUp.refreshToken = "Bearer " +  createRefreshToken(user_toSignUp);
 
     await user_toSignUp.save()
     res.status(201).send({
@@ -90,23 +88,23 @@ module.exports.signin = catchAsyncError(async(req, res) => {
 
 
     if(jwtTokenValidationChecker(user_toLogIn.accessToken, process.env.ACCESS_TOKEN_SECRET)){
-        user_toLogIn.accessToken = createAccessToken(user_toLogIn)
-        user_toLogIn.refreshToken = createRefreshToken(user_toLogIn)
+        user_toLogIn.accessToken = "Bearer " +  createAccessToken(user_toLogIn)
+        user_toLogIn.refreshToken = "Bearer " +  createRefreshToken(user_toLogIn)
         return res.status(200).send({
             message: 'User logged in. Use the token to manage your tasks',
             token: user_toLogIn.accessToken
         })
     }else if(jwtTokenValidationChecker(user_toLogIn.refreshToken, process.env.REFRESH_TOKEN_SECRET)){
-        user_toLogIn.accessToken = createAccessToken(user_toLogIn)
-        user_toLogIn.refreshToken = createRefreshToken(user_toLogIn)
+        user_toLogIn.accessToken = "Bearer " + createAccessToken(user_toLogIn)
+        user_toLogIn.refreshToken = "Bearer " + createRefreshToken(user_toLogIn)
 
         return res.status(200).send({
             message: 'User logged in. Use the token to manage your tasks',
             token: user_toLogIn.accessToken
         })
     } else{
-        user_toLogIn.accessToken = createAccessToken(user_toLogIn)
-        user_toLogIn.refreshToken = createRefreshToken(user_toLogIn)
+        user_toLogIn.accessToken = "Bearer " + createAccessToken(user_toLogIn)
+        user_toLogIn.refreshToken = "Bearer " + createRefreshToken(user_toLogIn)
 
         return res.status(200).send({
             message: 'User logged in. Use the token to manage your tasks',
