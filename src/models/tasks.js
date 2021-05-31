@@ -19,6 +19,9 @@ const taskSchema = new Schema({
         type: Boolean,
         required: false,
         default: false
+    },
+    owner:{
+        type: String
     }
 });
 

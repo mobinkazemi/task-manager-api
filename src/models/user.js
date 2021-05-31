@@ -3,24 +3,26 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const catchAsyncError = require('../middlewares/catchAsyncError');
 
-function passwordContentChecker(password){
+const  passwordContentChecker = (password) =>{
     const regex = /(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/
 
     return regex.test(password);
 }
 
-const hashPassword = async function (next) {
+const hashPassword = async function (pass) {
     try {
     if(!(this.password === this.confirmPassword)){
         throw new Error('Passwords do not match')
     }
-    this.password = await bcrypt.hash(this.password, 8);
-    this.confirmPassword = undefined;
-    next();
+    let password = await bcrypt.hash(pass, 8);
+    return password;
+
     } catch (err) {
         console.error(err);
     }
+    
 }
+
 
 const {Schema} = mongoose;
 
@@ -63,23 +65,25 @@ const userSchema = new Schema({
     },
     accessToken: {
         type: String,
-        required: true,
+        
         
     },
     refreshToken: {
         type: String,
-        required: true
+        
     }
 });
 
 
-userSchema.pre('save', function (next){
+
+userSchema.pre('save',async function (next){
     const user = this 
-    if(!user.isModified('password')) return next();
-    else hashPassword
+    let hashedPass = await hashPassword(user.password)
+    user.password = hashedPass
+    user.confirmPassword = undefined
     next();
 })
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+module.exports = {User};
