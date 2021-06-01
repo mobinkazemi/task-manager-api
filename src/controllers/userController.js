@@ -23,7 +23,7 @@ const createRefreshToken = (user, expireTime = "7d") => {
     return refreshToken;
 }
 
-const jwtTokenValidationChecker = async (token, secret) => {
+const jwtTokenValidationChecker = async(token, secret) => {
     try {
         const stillValid = await jwt.verify(token, secret)
         if(stillValid) return true 
@@ -33,7 +33,7 @@ const jwtTokenValidationChecker = async (token, secret) => {
     }
 }
 
-const compareHashedPassword = async(user, enteryPassword) => {
+const compareHashedPassword = catchAsyncError(async(user, enteryPassword) => {
     await bcrypt.compare(enteryPassword, user.password, (err, isValid) =>{
         if(err){
             console.log('error accured in compareHashedPassword: \n\n\n', err)
@@ -41,7 +41,7 @@ const compareHashedPassword = async(user, enteryPassword) => {
         
         return isValid
     })
-}
+})
 
 
 

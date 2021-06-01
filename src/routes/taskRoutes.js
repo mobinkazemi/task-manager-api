@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.post('/create', tokenValidation, taskController.create);
 
-router.get('/find', tokenValidation, taskController.find);
+router.get('/findAll', tokenValidation, taskController.findAll);
 
-router.get('/findById:id', tokenValidation, taskController.findById);
+router.get('/findByTitle', tokenValidation, taskController.findByTitle);
 
 // router.get ('/findByTitle:title', taskController.findByTitle);
 
